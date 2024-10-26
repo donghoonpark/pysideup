@@ -5,55 +5,15 @@ import os
 import astor
 import re
 
+from mappings import qtcore_mapping, qtgui_mapping, qtwidgets_mapping
+
 # Set up logging
 logging.basicConfig(level=logging.INFO)
 
 class PySide2ToPySide6Converter(ast.NodeTransformer):
     def __init__(self):
         self.used_symbols = set()
-        self.symbol_to_module = {
-            # QtCore
-            'QTimer': 'PySide6.QtCore', 'QDate': 'PySide6.QtCore', 'QTime': 'PySide6.QtCore',
-            'QDateTime': 'PySide6.QtCore', 'QObject': 'PySide6.QtCore', 'QEvent': 'PySide6.QtCore',
-            'QThread': 'PySide6.QtCore', 'QMutex': 'PySide6.QtCore', 'QWaitCondition': 'PySide6.QtCore',
-            'QSemaphore': 'PySide6.QtCore', 'QSettings': 'PySide6.QtCore', 'QCoreApplication': 'PySide6.QtCore',
-            'QAbstractEventDispatcher': 'PySide6.QtCore', 'QRegularExpression': 'PySide6.QtCore',
-            'QRegularExpressionValidator': 'PySide6.QtCore', 'QDesktopServices': 'PySide6.QtCore',
-            'Qt': 'PySide6.QtCore',
-            # QtGui
-            'QFont': 'PySide6.QtGui', 'QPixmap': 'PySide6.QtGui', 'QImage': 'PySide6.QtGui',
-            'QIcon': 'PySide6.QtGui', 'QColor': 'PySide6.QtGui', 'QPen': 'PySide6.QtGui',
-            'QBrush': 'PySide6.QtGui', 'QKeySequence': 'PySide6.QtGui', 'QScreen': 'PySide6.QtGui',
-            'QCursor': 'PySide6.QtGui', 'QPalette': 'PySide6.QtGui', 'QTextFormat': 'PySide6.QtGui',
-            'QTextCursor': 'PySide6.QtGui', 'QTextCharFormat': 'PySide6.QtGui', 'QAction': 'PySide6.QtGui',
-            'QSize': 'PySide6.QtGui', 'QRegion': 'PySide6.QtGui', 'QDesktopWidget': 'PySide6.QtGui',
-            'QPrinterInfo': 'PySide6.QtPrintSupport',
-            # QtWidgets
-            'QWidget': 'PySide6.QtWidgets', 'QHBoxLayout': 'PySide6.QtWidgets', 'QVBoxLayout': 'PySide6.QtWidgets',
-            'QPushButton': 'PySide6.QtWidgets', 'QLabel': 'PySide6.QtWidgets', 'QMainWindow': 'PySide6.QtWidgets',
-            'QDialog': 'PySide6.QtWidgets', 'QLineEdit': 'PySide6.QtWidgets', 'QCheckBox': 'PySide6.QtWidgets',
-            'QRadioButton': 'PySide6.QtWidgets', 'QTableWidget': 'PySide6.QtWidgets', 'QTabWidget': 'PySide6.QtWidgets',
-            'QGridLayout': 'PySide6.QtWidgets', 'QFormLayout': 'PySide6.QtWidgets', 'QGroupBox': 'PySide6.QtWidgets',
-            'QListView': 'PySide6.QtWidgets', 'QTreeView': 'PySide6.QtWidgets', 'QComboBox': 'PySide6.QtWidgets',
-            'QSpinBox': 'PySide6.QtWidgets', 'QDoubleSpinBox': 'PySide6.QtWidgets', 'QSlider': 'PySide6.QtWidgets',
-            'QProgressBar': 'PySide6.QtWidgets', 'QFrame': 'PySide6.QtWidgets', 'QToolBar': 'PySide6.QtWidgets',
-            'QMenuBar': 'PySide6.QtWidgets', 'QMenu': 'PySide6.QtWidgets', 'QStatusBar': 'PySide6.QtWidgets',
-            'QMessageBox': 'PySide6.QtWidgets', 'QFileDialog': 'PySide6.QtWidgets', 'QStackedWidget': 'PySide6.QtWidgets',
-            'QSplitter': 'PySide6.QtWidgets', 'QGraphicsView': 'PySide6.QtWidgets', 'QGraphicsScene': 'PySide6.QtWidgets',
-            'QGraphicsItem': 'PySide6.QtWidgets', 'QScrollArea': 'PySide6.QtWidgets', 'QTableView': 'PySide6.QtWidgets',
-            'QListWidget': 'PySide6.QtWidgets', 'QListWidgetItem': 'PySide6.QtWidgets', 'QSizePolicy': 'PySide6.QtWidgets',
-            # QtPrintSupport
-            'QPrinter': 'PySide6.QtPrintSupport', 'QPrintDialog': 'PySide6.QtPrintSupport',
-            'QPrintPreviewWidget': 'PySide6.QtPrintSupport', 'QPrintPreviewDialog': 'PySide6.QtPrintSupport',
-            # QtConcurrent
-            'QtConcurrent': 'PySide6.QtConcurrent',
-            # QtMultimedia
-            'QMediaPlayer': 'PySide6.QtMultimedia', 'QAudio': 'PySide6.QtMultimedia',
-            # QtNetwork
-            'QNetworkAccessManager': 'PySide6.QtNetwork', 'QNetworkRequest': 'PySide6.QtNetwork',
-            # QtOpenGL
-            'QOpenGLWidget': 'PySide6.QtOpenGLWidgets'
-        }
+        self.symbol_to_module = {**qtcore_mapping, **qtgui_mapping, **qtwidgets_mapping}
 
     def visit_ImportFrom(self, node):
         if node.module and node.module.startswith('PySide2'):

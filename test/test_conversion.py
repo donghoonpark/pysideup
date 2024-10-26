@@ -255,3 +255,34 @@ class TestWidgetWithMultipleImports(QWidget):
 
         # Assert that the output code matches the expected output, ignoring import order
         self.assertTrue(self.ast_equal_ignore_import_order(output_code, expected_output_code))
+
+    def test_conversion_with_exec_method(self):
+        # Input PySide2 code with exec_() method
+        input_code = """
+from PySide2.QtWidgets import QApplication
+
+app = QApplication([])
+app.exec_()
+        """
+        # Expected PySide6 code with exec() method
+        expected_output_code = """
+from PySide6.QtWidgets import QApplication
+
+app = QApplication([])
+app.exec()
+        """
+
+        # Write the input code to the test file
+        self.write_test_file(input_code)
+
+        # Run the conversion process on the test file
+        process_file(self.test_file_path)
+
+        # Read the converted code
+        output_code = self.read_test_file()
+
+        # Assert that the output code matches the expected output, ignoring import order
+        self.assertTrue(self.ast_equal_ignore_import_order(output_code, expected_output_code))
+
+if __name__ == '__main__':
+    unittest.main()
