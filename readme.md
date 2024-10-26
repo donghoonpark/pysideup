@@ -1,21 +1,21 @@
-# PySide2 to PySide6 Conversion Tool
+# PySideUp
 
-This repository contains a tool for converting PySide2 code to PySide6. The conversion updates imports, changes outdated components, and ensures your project is compatible with PySide6.
+This repository contains PySideUp, a tool for converting PySide2 code to PySide6. The conversion updates imports, changes outdated components, and ensures your project is compatible with PySide6.
 
 ## Features
 - **Automatic Import Update**: Converts PySide2 imports to PySide6 equivalents.
 - **Wildcard Handling**: Converts wildcard imports to explicitly imported components.
 
 ## Installation
-Clone this repository and install the required dependencies:
+You can install PySideUp from PyPI:
 ```sh
-pip install -r requirements.txt
+pip install pysideup
 ```
 
 ## Usage
-To convert a PySide2 file to PySide6, use the `converter.py` script:
+To convert a PySide2 file to PySide6, use the `pysideup` command:
 ```sh
-python converter.py <directory_path>
+pysideup <directory_path>
 ```
 You can also specify directories to exclude using `--exclude`.
 
