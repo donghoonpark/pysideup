@@ -67,6 +67,13 @@ class PySide2ToPySide6Converter(ast.NodeTransformer):
             self.used_symbols.add(node.id)
         return node
 
+    def visit_Call(self, node):
+        # Update exec_() to exec() for PySide6 compatibility
+        if isinstance(node.func, ast.Attribute) and node.func.attr == 'exec_':
+            node.func.attr = 'exec'
+            logging.info(f"Updated exec_() to exec() at line {node.lineno}")
+        return self.generic_visit(node)
+
     def add_imports(self, tree):
         """
         Add the correct PySide6 imports based on the used symbols.
@@ -89,13 +96,11 @@ class PySide2ToPySide6Converter(ast.NodeTransformer):
         tree.body = final_imports + [node for node in tree.body if not isinstance(node, ast.ImportFrom) or not node.module.startswith('PySide2')]
         return tree
 
-
 def normalize_code(code):
     """
     Normalize code by removing extra spaces, blank lines, and indentation differences.
     """
     return re.sub(r'\s+', ' ', code).strip()
-
 
 def process_file(file_path: str):
     """
@@ -129,7 +134,6 @@ def process_file(file_path: str):
     except Exception as e:
         logging.error(f"An error occurred while processing '{file_path}': {e}")
 
-
 def process_directory(directory: str, exclude_dirs: list):
     """
     Processes all .py files in the given directory and its subdirectories,
@@ -143,7 +147,6 @@ def process_directory(directory: str, exclude_dirs: list):
             if file.endswith('.py'):
                 file_path = os.path.join(root, file)
                 process_file(file_path)
-
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Convert PySide2 code to PySide6.')
